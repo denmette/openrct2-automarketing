@@ -12,9 +12,22 @@ function main(): void {
   });
 
   function validateCampaigns() {
+    const isPayForEntrance = config.isPayForEntranceScenario();
+    const entranceCampaigns = [
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_FREE,
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_HALF_PRICE,
+    ];
+
     const campaigns = Object.keys(AdvertisingCampaign)
       .map((x) => Number(x))
-      .filter((x) => config.getCampaignEnabled(x));
+      .filter((x) => config.getCampaignEnabled(x))
+      .filter((x) => {
+        // Only include entrance campaigns if we're in a pay-for-entrance scenario
+        if (entranceCampaigns.indexOf(x) !== -1) {
+          return isPayForEntrance;
+        }
+        return true;
+      });
 
     if (campaigns.length > 0) {
       const nextGenerationDate = config.getRenewalDate();
@@ -34,11 +47,11 @@ function main(): void {
     let rideId: number | undefined;
 
     function getRandomRideOrStall(
-      classification: "stall" | "ride"
+      classification: "stall" | "ride",
     ): number | undefined {
       const validRides = map.rides.filter(
         (ride) =>
-          ride.classification === classification && ride.status !== "closed"
+          ride.classification === classification && ride.status !== "closed",
       );
 
       if (validRides.length > 0) {
