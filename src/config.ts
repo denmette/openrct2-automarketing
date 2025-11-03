@@ -36,4 +36,17 @@ const config = {
   setRenewalDate(value: { year: number; month: number; day: number }) {
     return context.getParkStorage(namespace).set("renewal_day", value);
   },
+
+  isPayForEntranceScenario(): boolean {
+    // Scenario allows charging for park entry
+    if (!park.getFlag("freeParkEntry")) {
+      return true;
+    }
+    // RCT1-style scenario where you can charge for both - would need to check user preference
+    // For now, we'll assume if unlockAllPrices is true, entrance campaigns are relevant
+    if (park.getFlag("unlockAllPrices")) {
+      return true;
+    }
+    return false;
+  },
 };

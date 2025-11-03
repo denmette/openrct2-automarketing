@@ -7,51 +7,95 @@ function showMarketingWindow(): void {
     return;
   }
 
+  const isPayForEntrance = config.isPayForEntranceScenario();
+  const widgets: WidgetDesc[] = [makeDurationDropdown(20)];
+  let yPos = 40;
+
+  // Add informational text about scenario type
+  widgets.push({
+    type: "label",
+    x: 10,
+    y: yPos,
+    width: 220,
+    height: 12,
+    text: isPayForEntrance
+      ? "Park Entry Scenario - All campaigns available"
+      : "Pay-Per-Ride Scenario - Entry campaigns disabled",
+    textAlign: "centred",
+  });
+  yPos += 20;
+
+  // Only show entrance campaigns in pay-for-entrance scenarios
+  if (isPayForEntrance) {
+    widgets.push(
+      makeCampaignCheckbox(
+        yPos,
+        "Free Park Entry",
+        AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_FREE,
+      ),
+    );
+    yPos += 20;
+
+    widgets.push(
+      makeCampaignCheckbox(
+        yPos,
+        "Half Price Park Entry",
+        AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_HALF_PRICE,
+      ),
+    );
+    yPos += 20;
+  }
+
+  // Always show ride and other campaigns
+  widgets.push(
+    makeCampaignCheckbox(
+      yPos,
+      "Free Ride Entry",
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_RIDE_FREE,
+    ),
+  );
+  yPos += 20;
+
+  widgets.push(
+    makeCampaignCheckbox(
+      yPos,
+      "Free Food/Drink",
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_FOOD_OR_DRINK_FREE,
+    ),
+  );
+  yPos += 20;
+
+  widgets.push(
+    makeCampaignCheckbox(
+      yPos,
+      "General Park Campaign",
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK,
+    ),
+  );
+  yPos += 20;
+
+  widgets.push(
+    makeCampaignCheckbox(
+      yPos,
+      "Specific Ride Campaign",
+      AdvertisingCampaign.ADVERTISING_CAMPAIGN_RIDE,
+    ),
+  );
+
   const windowDesc: WindowDesc = {
     classification: marketingWindowTag,
     width: 240,
-    height: 220,
+    height: yPos + 40, // Dynamic height based on number of campaigns
     title: "Auto Marketing Campaigns",
-    widgets: [
-      makeDurationDropdown(20),
-      makeCampaignCheckbox(
-        40,
-        "Free Park Entry",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_FREE
-      ),
-      makeCampaignCheckbox(
-        60,
-        "Free Ride Entry",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_RIDE_FREE
-      ),
-      makeCampaignCheckbox(
-        80,
-        "Half Price Park Entry",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK_ENTRY_HALF_PRICE
-      ),
-      makeCampaignCheckbox(
-        100,
-        "Free Food/Drink",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_FOOD_OR_DRINK_FREE
-      ),
-      makeCampaignCheckbox(
-        120,
-        "General Park Campaign",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_PARK
-      ),
-      makeCampaignCheckbox(
-        140,
-        "Specific Ride Campaign",
-        AdvertisingCampaign.ADVERTISING_CAMPAIGN_RIDE
-      ),
-    ],
+    widgets: widgets,
   };
   ui.openWindow(windowDesc);
 }
 
-function makeDurationDropdown(y: number): DropdownWidget {
+function makeDurationDropdown(y: number): DropdownDesc {
   const options = [2, 4, 6, 8, 10, 12];
-  const selectedIndex = options.indexOf(config.getCampaignDuration() ?? defaults.duration) ?? 0;
+  const selectedIndex =
+    options.indexOf(config.getCampaignDuration() ?? defaults.duration) ?? 0;
   return {
     type: "dropdown",
     x: 10,
@@ -71,8 +115,8 @@ function makeDurationDropdown(y: number): DropdownWidget {
 function makeCampaignCheckbox(
   y: number,
   label: string,
-  campaignType: AdvertisingCampaign
-): CheckboxWidget {
+  campaignType: AdvertisingCampaign,
+): CheckboxDesc {
   return {
     type: "checkbox",
     x: 10,
